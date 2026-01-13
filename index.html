@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snowglobe Train Tunnel Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            background: #1a1a2e;
+        }
+
+        #main-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        .menu-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .menu-content {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 50px 60px;
+            border-radius: 30px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 
+                        inset 0 0 40px rgba(255, 255, 255, 0.05);
+            text-align: center;
+            min-width: 500px;
+            max-width: 600px;
+            position: relative;
+            backdrop-filter: blur(10px);
+            margin: auto;
+            transform: translate(0, 0);
+        }
+
+        .title-container {
+            margin-bottom: 40px;
+        }
+
+        .game-title {
+            margin: 0;
+            padding: 0;
+            line-height: 1.2;
+        }
+
+        .title-main {
+            display: block;
+            font-size: 64px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(118, 75, 162, 0.5);
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+        }
+
+        .title-sub {
+            display: block;
+            font-size: 28px;
+            font-weight: 600;
+            color: #a8a8d0;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+        }
+
+        .title-decoration {
+            font-size: 32px;
+            margin-top: 15px;
+            opacity: 0.8;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .menu-section {
+            margin: 35px 0;
+        }
+
+        .section-title {
+            color: #b8b8e0;
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        .season-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .season-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 3px solid;
+            padding: 20px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .season-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .season-btn:hover::before {
+            left: 100%;
+        }
+
+        .spring-btn {
+            border-color: #ff6b9d;
+            background: linear-gradient(135deg, rgba(255, 107, 157, 0.2), rgba(255, 182, 193, 0.1));
+        }
+
+        .spring-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 107, 157, 0.4), rgba(255, 182, 193, 0.2));
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 107, 157, 0.4);
+        }
+
+        .spring-btn.selected {
+            border-color: #ff1493;
+            background: linear-gradient(135deg, rgba(255, 20, 147, 0.5), rgba(255, 107, 157, 0.3));
+            box-shadow: 0 0 25px rgba(255, 20, 147, 0.6);
+        }
+
+        .summer-btn {
+            border-color: #ffd700;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 255, 0, 0.1));
+        }
+
+        .summer-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.4), rgba(255, 255, 0, 0.2));
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+
+        .summer-btn.selected {
+            border-color: #ff8c00;
+            background: linear-gradient(135deg, rgba(255, 140, 0, 0.5), rgba(255, 215, 0, 0.3));
+            box-shadow: 0 0 25px rgba(255, 140, 0, 0.6);
+        }
+
+        .fall-btn {
+            border-color: #ff8c00;
+            background: linear-gradient(135deg, rgba(255, 140, 0, 0.2), rgba(255, 69, 0, 0.1));
+        }
+
+        .fall-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 140, 0, 0.4), rgba(255, 69, 0, 0.2));
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 140, 0, 0.4);
+        }
+
+        .fall-btn.selected {
+            border-color: #ff4500;
+            background: linear-gradient(135deg, rgba(255, 69, 0, 0.5), rgba(255, 140, 0, 0.3));
+            box-shadow: 0 0 25px rgba(255, 69, 0, 0.6);
+        }
+
+        .winter-btn {
+            border-color: #00bfff;
+            background: linear-gradient(135deg, rgba(0, 191, 255, 0.2), rgba(135, 206, 250, 0.1));
+        }
+
+        .winter-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 191, 255, 0.4), rgba(135, 206, 250, 0.2));
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 191, 255, 0.4);
+        }
+
+        .winter-btn.selected {
+            border-color: #1e90ff;
+            background: linear-gradient(135deg, rgba(30, 144, 255, 0.5), rgba(0, 191, 255, 0.3));
+            box-shadow: 0 0 25px rgba(30, 144, 255, 0.6);
+        }
+
+        .season-icon {
+            font-size: 36px;
+            display: block;
+        }
+
+        .season-name {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .season-desc {
+            font-size: 11px;
+            opacity: 0.8;
+            font-style: italic;
+        }
+
+        .menu-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            font-size: 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 12px 0;
+            width: 100%;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+        }
+
+        .menu-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(118, 75, 162, 0.6);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .menu-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-icon {
+            font-size: 24px;
+        }
+
+        .btn-text {
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        #status {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        #instructions {
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        #placement-ui {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        #placement-rotation {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        #heightmap-input {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        #heightmap-input input[type="file"] {
+            display: none;
+        }
+
+        #heightmap-button {
+            background: #555;
+            color: white;
+            border: 2px solid #777;
+            padding: 8px 12px;
+            font-size: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        #heightmap-button:hover {
+            background: #666;
+        }
+
+        #heightmap-status {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        #trackmap-controls {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        #trackmap-controls button {
+            background: #555;
+            color: white;
+            border: 2px solid #777;
+            padding: 8px 12px;
+            font-size: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        #trackmap-controls button:hover {
+            background: #666;
+        }
+
+        #trackmap-file {
+            display: none;
+        }
+
+        #circuit-controls, #terrain-controls, #season-controls {
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+
+        #circuit-controls button, #terrain-controls button {
+            background: #555;
+            color: white;
+            border: 2px solid #777;
+            padding: 6px 10px;
+            font-size: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin: 3px 0;
+            transition: all 0.2s;
+        }
+
+        #circuit-controls button:hover, #terrain-controls button:hover {
+            background: #666;
+        }
+
+        #circuit-tools, #terrain-tools {
+            margin-top: 8px;
+        }
+
+        #terrain-tools label {
+            display: block;
+            font-size: 11px;
+            color: #ccc;
+            margin: 5px 0;
+        }
+
+        #terrain-tools input[type="range"] {
+            width: 100%;
+        }
+
+        #terrain-tools select {
+            width: 100%;
+            padding: 4px;
+            background: #555;
+            color: white;
+            border: 1px solid #777;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        #season-controls label {
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        #season-select {
+            padding: 4px;
+            background: #555;
+            color: white;
+            border: 1px solid #777;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+
+        #start-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        #start-button:hover {
+            background: #45a049;
+        }
+
+        #start-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .snowglobe-type-button {
+            background: #555;
+            color: white;
+            border: 2px solid #777;
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 0;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .snowglobe-type-button:hover {
+            background: #666;
+        }
+
+        .snowglobe-type-button.selected {
+            background: #4CAF50;
+            border-color: #45a049;
+        }
+
+        .snowglobe-type-button img,
+        .snowglobe-type-button div {
+            margin-right: 8px;
+        }
+
+        #type-selector-tabs {
+            margin-top: 10px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .tab-button {
+            flex: 1;
+            background: #555;
+            color: white;
+            border: 2px solid #777;
+            padding: 8px 12px;
+            font-size: 12px;
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: none;
+        }
+
+        .tab-button:hover {
+            background: #666;
+        }
+
+        .tab-button.active {
+            background: #4CAF50;
+            border-color: #45a049;
+            border-bottom: 2px solid #4CAF50;
+        }
+
+        .tab-content {
+            display: none;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 0 5px 5px 5px;
+            border: 2px solid #777;
+            border-top: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .track-type-button {
+            background: #555;
+            color: white;
+            border: 2px solid #777;
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 0;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .track-type-button:hover {
+            background: #666;
+        }
+
+        .track-type-button.selected {
+            background: #4CAF50;
+            border-color: #45a049;
+        }
+
+        #placement-mode-selector {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .mode-button {
+            flex: 1;
+            background: #555;
+            color: white;
+            border: 2px solid #777;
+            padding: 8px 12px;
+            font-size: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-button:hover {
+            background: #666;
+        }
+
+        .mode-button.active {
+            background: #4CAF50;
+            border-color: #45a049;
+        }
+
+        .mode-button {
+            font-size: 14px;
+        }
+
+        #placement-instructions {
+            font-size: 11px;
+            margin-top: 5px;
+            color: #aaa;
+        }
+
+        #placement-banner {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            border: 2px solid #4CAF50;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            animation: bannerPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes bannerPulse {
+            0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+            50% { opacity: 0.9; transform: translateX(-50%) scale(1.02); }
+        }
+
+        #banner-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #snowglobe-selector {
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+
+        #snowglobe-selector-title {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #ccc;
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            z-index: 200;
+        }
+
+        #epilepsy-warning {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 20000;
+            margin: 0;
+            padding: 0;
+        }
+
+        .warning-content {
+            background: rgba(20, 20, 20, 0.95);
+            padding: 60px 80px;
+            border-radius: 20px;
+            border: 4px solid #ff4444;
+            box-shadow: 0 0 40px rgba(255, 68, 68, 0.5);
+            text-align: center;
+            max-width: 700px;
+            margin: 20px;
+        }
+
+        .warning-content h1 {
+            color: #ff4444;
+            font-size: 48px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+        }
+
+        .warning-content h2 {
+            color: #ffaaaa;
+            font-size: 28px;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .warning-content p {
+            color: #ffffff;
+            font-size: 18px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .warning-content .warning-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .warning-content .warning-list {
+            text-align: left;
+            color: #ffcccc;
+            font-size: 16px;
+            margin: 25px 0;
+            padding-left: 30px;
+        }
+
+        .warning-content .warning-list li {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        .warning-button {
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 5px 20px rgba(255, 68, 68, 0.4);
+        }
+
+        .warning-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(255, 68, 68, 0.6);
+            background: linear-gradient(135deg, #ff6666 0%, #ff4444 100%);
+        }
+
+        .warning-button:active {
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div id="epilepsy-warning" style="display: flex;">
+        <div class="warning-content">
+            <span class="warning-icon">⚠️</span>
+            <h1>EPILEPSY WARNING</h1>
+            <h2>Photosensitive Seizure Warning</h2>
+            <p>
+                This game contains flashing lights, rapid color changes, and animated effects 
+                that may trigger seizures in people with photosensitive epilepsy or other 
+                photosensitive conditions.
+            </p>
+            <ul class="warning-list">
+                <li>Rapidly flashing or strobing lights</li>
+                <li>Fast-moving animations and transitions</li>
+                <li>Rapid color changes and visual effects</li>
+                <li>Bright, contrasting visual elements</li>
+            </ul>
+            <p style="color: #ffaaaa; font-weight: 600;">
+                If you or anyone in your household has a history of epilepsy or seizures, 
+                please consult a doctor before playing.
+            </p>
+            <button class="warning-button" id="acknowledge-warning">
+                I Understand - Continue
+            </button>
+        </div>
+    </div>
+    <div id="main-menu" style="display: none;">
+        <div class="menu-background"></div>
+        <div class="menu-content">
+            <div class="title-container">
+                <h1 class="game-title">
+                    <span class="title-main">SNOWGLOBE</span>
+                    <span class="title-sub">TRAIN ADVENTURE</span>
+                </h1>
+                <div class="title-decoration">🚂 ❄️ 🌍</div>
+            </div>
+            <div class="menu-section">
+                <h2 class="section-title">Select Season</h2>
+                <div class="season-buttons">
+                    <button class="season-btn spring-btn" data-season="spring">
+                        <span class="season-icon">🌸</span>
+                        <span class="season-name">SPRING</span>
+                        <span class="season-desc">Fresh & Blooming</span>
+                    </button>
+                    <button class="season-btn summer-btn" data-season="summer">
+                        <span class="season-icon">☀️</span>
+                        <span class="season-name">SUMMER</span>
+                        <span class="season-desc">Bright & Lush</span>
+                    </button>
+                    <button class="season-btn fall-btn" data-season="fall">
+                        <span class="season-icon">🍂</span>
+                        <span class="season-name">AUTUMN</span>
+                        <span class="season-desc">Golden & Crisp</span>
+                    </button>
+                    <button class="season-btn winter-btn" data-season="winter">
+                        <span class="season-icon">❄️</span>
+                        <span class="season-name">WINTER</span>
+                        <span class="season-desc">Frosty & Serene</span>
+                    </button>
+                </div>
+            </div>
+            <div class="menu-section">
+                <h2 class="section-title">Game Mode</h2>
+                <button class="menu-btn custom-btn" id="start-custom-btn">
+                    <span class="btn-icon">🎨</span>
+                    <span class="btn-text">Custom Map</span>
+                </button>
+                <button class="menu-btn random-btn" id="start-random-btn">
+                    <span class="btn-icon">🎲</span>
+                    <span class="btn-text">Random Map</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="game-container" style="display: none;">
+        <div id="loading">Loading game...</div>
+        <div id="ui">
+            <div id="status">Speed: 0.0 | Distance: 0.0</div>
+            <div id="fps-display" style="font-size: 12px; color: #aaa; margin-top: 5px;">FPS: 60</div>
+            <div id="instructions">WASD: Move | ESC: Quit | Stay in the tunnel!</div>
+        </div>
+        <div id="placement-ui">
+            <div id="placement-banner" style="display: none;">
+                <div id="banner-content"></div>
+            </div>
+            <div id="placement-status">Placement Mode</div>
+            <div id="placement-rotation">Rotation: 0°</div>
+            <div id="placement-instructions">
+                <strong>🖱️ Cursor:</strong> Navigate only (no placement)<br>
+                <strong>❄️ Snowglobes:</strong> Click to place<br>
+                <strong>🚂 Tracks:</strong> Click twice to place track<br>
+                <strong>Right-click:</strong> Remove objects<br>
+                <strong>Q/E or Mouse Wheel:</strong> Rotate snowglobe<br>
+                <strong>G:</strong> Toggle grid<br>
+                <strong>Ctrl+Z:</strong> Undo | <strong>Ctrl+Shift+Z:</strong> Redo<br>
+                <strong>Drag:</strong> Rotate camera
+            </div>
+            <div id="type-selector-tabs">
+                <div class="tab-buttons">
+                    <button class="tab-button active" data-tab="snowglobes">❄️ Snowglobes</button>
+                    <button class="tab-button" data-tab="tracks">🚂 Tracks</button>
+                </div>
+                <div id="tab-content-snowglobes" class="tab-content active">
+                    <div id="snowglobe-selector">
+                        <div id="snowglobe-selector-title">Loading snowglobes...</div>
+                    </div>
+                </div>
+                <div id="tab-content-tracks" class="tab-content">
+                    <div id="track-selector">
+                        <div id="track-selector-title">Track Types</div>
+                        <button class="track-type-button" data-track-type="straight">📏 Straight Track</button>
+                        <button class="track-type-button" data-track-type="curved">🔄 Curved Track</button>
+                    </div>
+                </div>
+            </div>
+            <div id="placement-mode-selector">
+                <button id="cursor-mode-button" class="mode-button active">🖱️ Cursor</button>
+                <button id="snowglobe-mode-button" class="mode-button">❄️ Snowglobes</button>
+                <button id="track-mode-button" class="mode-button">🚂 Tracks</button>
+            </div>
+            <div id="track-options" style="display: none; margin-top: 5px;">
+                <label style="font-size: 11px; color: #ccc;">
+                    <input type="checkbox" id="curved-track-toggle" /> Curved Tracks
+                </label>
+            </div>
+            <div id="snowglobe-count">Snowglobes placed: 0</div>
+            <div id="heightmap-input">
+                <label for="heightmap-file">
+                    <div id="heightmap-button">Load Height Map (PNG/Grayscale)</div>
+                </label>
+                <input type="file" id="heightmap-file" accept="image/png,image/jpeg,image/jpg" />
+                <div id="heightmap-status">No height map loaded</div>
+            </div>
+            <div id="trackmap-controls">
+                <button id="save-trackmap-button">Save Track Map</button>
+                <label for="trackmap-file">
+                    <button id="load-trackmap-button">Load Track Map</button>
+                </label>
+                <input type="file" id="trackmap-file" accept=".json,application/json" />
+                <div id="trackmap-status"></div>
+            </div>
+            <div id="circuit-controls">
+                <button id="circuit-mode-button">Circuit Mode: Off</button>
+                <div id="circuit-tools" style="display: none;">
+                    <button id="add-switch-button">Add Switch</button>
+                    <button id="add-signal-button">Add Signal</button>
+                    <button id="add-gate-button">Add Logic Gate</button>
+                </div>
+            </div>
+            <div id="terrain-controls">
+                <button id="terrain-edit-button">Terrain Edit: Off</button>
+                <div id="terrain-tools" style="display: none;">
+                    <select id="terrain-tool-select">
+                        <option value="raise">Raise</option>
+                        <option value="lower">Lower</option>
+                        <option value="smooth">Smooth</option>
+                        <option value="paint">Paint Texture</option>
+                    </select>
+                    <label>Brush Size: <input type="range" id="brush-size" min="1" max="20" value="5" /></label>
+                    <label>Strength: <input type="range" id="brush-strength" min="0.1" max="2" step="0.1" value="0.5" /></label>
+                </div>
+            </div>
+            <div id="season-controls">
+                <label>Season: 
+                    <select id="season-select">
+                        <option value="spring">Spring</option>
+                        <option value="summer">Summer</option>
+                        <option value="fall">Fall</option>
+                        <option value="winter" selected>Winter</option>
+                    </select>
+                </label>
+            </div>
+            <button id="start-button" disabled>Start Driving</button>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="game.js"></script>
+</body>
+</html>
